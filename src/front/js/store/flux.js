@@ -31,6 +31,28 @@ const getState = ({ getStore, getActions, setStore }) => {
                 }
             },
 
+            getMessage: async () => {
+                try {
+                    const response = await fetch(`${process.env.BACKEND_URL}/message`, {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        }
+                    });
+                    const data = await response.json();
+
+                    console.log('Mensaje recibido de la API:', data);
+
+                    if (response.ok) {
+                        // Haz lo que necesites con el mensaje recibido, como almacenarlo en el store
+                        setStore({ message: data.message });
+                    } else {
+                        console.error('Error al obtener el mensaje', data);
+                    }
+                } catch (error) {
+                    console.error('Error al obtener el mensaje:', error);
+                }
+            },
+
             // para actualizar un contacto ya creado en la API
             updateContact: async (id, updatedContact) => {
                 try {

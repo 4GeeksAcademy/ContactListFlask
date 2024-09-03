@@ -3,7 +3,7 @@ import { Context } from "../store/appContext";
 import ContactCard from "../component/ContactCard.js";
 import { Link } from "react-router-dom";
 
-const Contact = () => {
+export const Contact = () => {
     const { store, actions } = useContext(Context);
 
     useEffect(() => {

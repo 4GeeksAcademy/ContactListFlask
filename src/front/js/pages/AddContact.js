@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect } from "react";
 import { Context } from "../store/appContext";
 import { useNavigate, useParams } from "react-router-dom";
 
-const AddContact = () => {
+export const AddContact = () => {
     const { store, actions } = useContext(Context);
     const navigate = useNavigate();
     const { id } = useParams();
