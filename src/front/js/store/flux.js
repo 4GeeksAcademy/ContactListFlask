@@ -1,128 +1,145 @@
 const initialState = {
-    contacts: []   // estado inicial, que sera con una lista vacia 
+    contacts: [],  // Estado inicial  una lista vacía de contactos
+    token: localStorage.getItem('token') || null, // Recuperar token desde localStorage
+    errorMessage: null 
 };
 
 const getState = ({ getStore, getActions, setStore }) => {
     return {
         store: initialState,
         actions: {
-            // para crear un nuevo contacto y persistirlo en la API
+            // Acción para crear un nuevo contacto y persistirlo en la API
             addContact: async (newContact) => {
+                const store = getStore();
                 try {
-                    const response = await fetch(`${process.env.BACKEND_URL}/contacts`, {
+                    const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/contacts`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                            'Authorization': `Bearer ${store.token}` 
                         },
                         body: JSON.stringify(newContact)
                     });
 
                     if (response.ok) {
                         const contact = await response.json();
-                        const store = getStore();
                         setStore({ contacts: [...store.contacts, contact] });
                         console.log('Contacto agregado y guardado:', contact);
                     } else {
-                        console.error('Error al agregar el contacto');
+                        const errorData = await response.json();
+                        setStore({ errorMessage: errorData.message });
+                        console.error('Error al agregar el contacto:', errorData);
                     }
                 } catch (error) {
                     console.error('Error en la solicitud:', error);
                 }
             },
 
-            getMessage: async () => {
+            
+            getContacts: async () => {
+                const store = getStore();
                 try {
-                    const response = await fetch(`${process.env.BACKEND_URL}/message`, {
+                    const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/contacts`, {
                         headers: {
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                            'Authorization': `Bearer ${store.token}` 
                         }
                     });
                     const data = await response.json();
 
-                    console.log('Mensaje recibido de la API:', data);
-
                     if (response.ok) {
-                        // Haz lo que necesites con el mensaje recibido, como almacenarlo en el store
-                        setStore({ message: data.message });
+                        setStore({ contacts: data });
                     } else {
-                        console.error('Error al obtener el mensaje', data);
+                        setStore({ errorMessage: data.message });
+                        console.error('Error al obtener los contactos:', data);
                     }
                 } catch (error) {
-                    console.error('Error al obtener el mensaje:', error);
+                    console.error('Error al obtener los contactos:', error);
                 }
             },
 
-            // para actualizar un contacto ya creado en la API
+            
             updateContact: async (id, updatedContact) => {
+                const store = getStore();
                 try {
-                    const response = await fetch(`${process.env.BACKEND_URL}/contacts/${id}`, {
+                    const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/contacts/${id}`, {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                            'Authorization': `Bearer ${store.token}`
                         },
                         body: JSON.stringify(updatedContact)
                     });
 
                     if (response.ok) {
-                        const store = getStore();
                         const updatedContacts = store.contacts.map(contact =>
                             contact.id === parseInt(id) ? { ...contact, ...updatedContact } : contact
                         );
                         setStore({ contacts: updatedContacts });
-                        console.log('Contacto actualizado:', updatedContact);
                     } else {
-                        console.error('Error al actualizar el contacto');
+                        const errorData = await response.json();
+                        setStore({ errorMessage: errorData.message });
+                        console.error('Error al actualizar el contacto:', errorData);
                     }
                 } catch (error) {
                     console.error('Error en la solicitud:', error);
                 }
             },
 
-            // para eliminar un contacto tanto en el estado local como en la API
+            
             deleteContact: async (id) => {
+                const store = getStore();
                 try {
-                    const response = await fetch(`${process.env.BACKEND_URL}/contacts/${id}`, {
+                    const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/contacts/${id}`, {
                         method: 'DELETE',
                         headers: {
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                            'Authorization': `Bearer ${store.token}`
                         }
                     });
 
                     if (response.ok) {
-                        const store = getStore();
                         const updatedContacts = store.contacts.filter(contact => contact.id !== id);
                         setStore({ contacts: updatedContacts });
-                        console.log('Contacto eliminado con id:', id);
                     } else {
-                        console.error('Error al eliminar el contacto');
+                        const errorData = await response.json();
+                        setStore({ errorMessage: errorData.message });
+                        console.error('Error al eliminar el contacto:', errorData);
                     }
                 } catch (error) {
                     console.error('Error en la solicitud:', error);
                 }
             },
 
-            // para obtener todos los contactos del usuario autenticado
-            getContacts: async () => {
+            
+            login: async (email, password) => {
                 try {
-                    const response = await fetch(`${process.env.BACKEND_URL}/contacts`, {
+                    const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/login`, {
+                        method: 'POST',
                         headers: {
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`
-                        }
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ email, password })
                     });
+
                     const data = await response.json();
 
-                    console.log('Datos recibidos de la API:', data);
-
-                    if (response.ok && Array.isArray(data.data)) {
-                        setStore({ contacts: data.data });
+                    if (response.ok) {
+                        localStorage.setItem('token', data.access_token);
+                        setStore({ token: data.access_token });
+                        console.log('Inicio de sesión exitoso');
                     } else {
-                        console.error('Error: La respuesta de la API no es un array', data);
+                        setStore({ errorMessage: data.message });
+                        console.error('Error en el inicio de sesión:', data);
                     }
                 } catch (error) {
-                    console.error('Error al obtener los contactos:', error);
+                    console.error('Error en la solicitud:', error);
                 }
+            },
+
+            // Método para cerrar sesión
+            logout: () => {
+                localStorage.removeItem('token');
+                setStore({ token: null, contacts: [] });
+                console.log('Cierre de sesión exitoso');
             }
         }
     };

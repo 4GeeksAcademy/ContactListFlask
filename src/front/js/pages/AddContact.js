@@ -30,7 +30,7 @@ export const AddContact = () => {
         });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (!validateEmail(contact.email)) {
@@ -43,12 +43,16 @@ export const AddContact = () => {
             return;
         }
 
-        if (id) {
-            actions.updateContact(id, contact);
-        } else {
-            actions.addContact(contact);
+        try {
+            if (id) {
+                await actions.updateContact(id, contact);
+            } else {
+                await actions.addContact(contact);
+            }
+            navigate("/contacts");
+        } catch (error) {
+            console.error("Error while adding/updating contact:", error);
         }
-        navigate("/contacts");
     };
 
     const validateEmail = (email) => {

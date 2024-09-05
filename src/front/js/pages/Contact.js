@@ -17,7 +17,7 @@ export const Contact = () => {
             <div className="row">
                 {store.contacts.length > 0 ? (
                     store.contacts.map((contact, index) => (
-                        <ContactCard key={contact._id || contact.id || index} contact={contact} />
+                        <ContactCard key={contact.id || index} contact={contact} />
                     ))
                 ) : (
                     <p>No contacts available</p>
