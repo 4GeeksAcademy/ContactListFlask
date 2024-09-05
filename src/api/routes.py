@@ -7,7 +7,7 @@ from api.models import User, Contact
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-from werkzeug.security import generate_password_hash, check_password_hash # me ayuda a que mi contraseña sea mas segura, indagando he dado con esta libreria
+
 
 # blueprint hace que todas mis rutas comiencen con api 
 api = Blueprint('api', __name__)
@@ -26,8 +26,7 @@ def handle_hello():
 @api.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
-    hashed_password = generate_password_hash(data['password'], method='pbkdf2:sha256')
-    new_user = User(email=data['email'], password=hashed_password, is_active=True)
+    new_user = User(email=data['email'], password=data['password'], is_active=True)
     db.session.add(new_user)
     db.session.commit()
     return jsonify({"message": "User registered successfully"}), 201
@@ -36,7 +35,7 @@ def register():
 def login():
     data = request.get_json()
     user = User.query.filter_by(email=data['email']).first()
-    if not user or not check_password_hash(user.password, data['password']):
+    if not user or user.password != data['password']:
         return jsonify({"message": "Invalid credentials"}), 401
     access_token = create_access_token(identity=user.id)
     return jsonify(access_token=access_token), 200
