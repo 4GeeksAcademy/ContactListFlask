@@ -143,6 +143,7 @@ const getState = ({ getStore, getActions, setStore }) => {
             },
 
             getMessage: async () => {
+                const store = getStore();
                 try {
                     const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/message`, {
                         headers: {
