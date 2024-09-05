@@ -135,12 +135,29 @@ const getState = ({ getStore, getActions, setStore }) => {
                 }
             },
 
-            // Método para cerrar sesión
+        
             logout: () => {
                 localStorage.removeItem('token');
                 setStore({ token: null, contacts: [] });
                 console.log('Cierre de sesión exitoso');
+            },
+
+            getMessage: async () => {
+                try {
+                    const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/message`, {
+                        headers: {
+                            'Authorization': `Bearer ${store.token}`
+                        }
+                    });
+                    const data = await response.json();
+                    if (response.ok) {
+                        setStore({ message: data.message });
+                    }
+                } catch (error) {
+                    console.error('Error fetching message:', error);
+                }
             }
+            
         }
     };
 };
