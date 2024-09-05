@@ -13,7 +13,7 @@ from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identi
 api = Blueprint('api', __name__)
 
 # Allow CORS requests to this API
-CORS(api)
+CORS(api,  resources={r"/*": {"origins": "https://scaling-space-doodle-4j75465xpx47h5jrx-3000.app.github.dev/"}})
 
 @api.route('/hello', methods=['POST', 'GET'])
 def handle_hello():
@@ -95,4 +95,10 @@ def update_contact(contact_id):
     db.session.commit()
     return jsonify({"message": "Contact updated successfully"}), 200
 
+
+@api.route('/message', methods=['GET'])
+@jwt_required()
+def get_message():
+    user_id = get_jwt_identity()
+    return jsonify({"message": f"Hello user {user_id}!"}), 200
 

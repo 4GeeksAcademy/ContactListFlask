@@ -144,20 +144,26 @@ const getState = ({ getStore, getActions, setStore }) => {
 
             getMessage: async () => {
                 const store = getStore();
+                console.log("Token en el store:", store.token); 
+            
                 try {
                     const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/message`, {
                         headers: {
                             'Authorization': `Bearer ${store.token}`
                         }
                     });
+            
                     const data = await response.json();
                     if (response.ok) {
                         setStore({ message: data.message });
+                    } else {
+                        console.error("Error en la respuesta del servidor:", data);
                     }
                 } catch (error) {
                     console.error('Error fetching message:', error);
                 }
             }
+            
             
         }
     };
