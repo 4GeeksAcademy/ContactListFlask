@@ -16,7 +16,7 @@ import injectContext from "./store/appContext";
 
 import { Navbar } from "./component/navbar";
 import { Footer } from "./component/footer";
-import { ShowMassage } from "./component/ShowMessage"
+import  ShowMassage  from "./component/ShowMessage";
 
 
 //create your first component
