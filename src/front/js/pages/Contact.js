@@ -8,11 +8,14 @@ export const Contact = () => {
 
     useEffect(() => {
         actions.getContacts();
+        if (!store.user) {
+            actions.getUserProfile();
+        }
     }, []);
 
     return (
         <div className="container">
-            <h1 className="my-4">Contacts</h1>
+            <h1 className="my-4">Bienvenido, {store.user?.name}</h1>
             <Link to="/add-contact" className="btn btn-success mb-4">Add New Contact</Link>
             <div className="row">
                 {store.contacts.length > 0 ? (

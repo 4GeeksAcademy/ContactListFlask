@@ -142,6 +142,30 @@ const getState = ({ getStore, getActions, setStore }) => {
                 console.log('Cierre de sesión exitoso');
             },
 
+            getUserProfile: async () => {
+                const store = getStore();
+                if (!store.token) return; 
+
+                try {
+                    const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/profile`, {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${store.token}`,
+                        },
+                    });
+
+                    if (!response.ok) {
+                        throw new Error("Error al obtener el perfil del usuario");
+                    }
+
+                    const data = await response.json();
+                    setStore({ user: data });
+                } catch (error) {
+                    console.error("Error en getUserProfile:", error);
+                }
+            },
+
             getMessage: async () => {
                 const store = getStore();
                 console.log("Token en el store:", store.token); 
